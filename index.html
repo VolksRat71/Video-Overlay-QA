@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Video Frame Overlay QA Tool</title>
+  <title>Image Overlay QA Tool</title>
   <style>
     * {
       box-sizing: border-box;
@@ -37,18 +37,18 @@
       margin-bottom: 20px;
     }
 
-    .video-input {
+    .image-input {
       background: #16213e;
       padding: 20px;
       border-radius: 8px;
     }
 
-    .video-input h3 {
+    .image-input h3 {
       margin-bottom: 15px;
       color: #e94560;
     }
 
-    .video-input.overlay h3 {
+    .image-input.overlay h3 {
       color: #0f3460;
     }
 
@@ -69,39 +69,17 @@
       margin-bottom: 15px;
     }
 
-    input[type="file"]:hover {
-      background: #1a4a7a;
-    }
-
-    .video-controls {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .video-scrubber {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    textarea {
       width: 100%;
-    }
-
-    .video-scrubber input[type="range"] {
-      flex: 1;
-      background: linear-gradient(to right, #e94560 0%, #0f3460 100%);
-    }
-
-    .time-display {
+      min-height: 100px;
+      padding: 10px;
+      background: #0f3460;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #fff;
       font-family: monospace;
       font-size: 12px;
-      min-width: 120px;
-      color: #aaa;
-    }
-
-    .capture-btn-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
+      margin-top: 10px;
     }
 
     button {
@@ -113,20 +91,11 @@
       cursor: pointer;
       font-size: 14px;
       transition: background 0.2s;
+      margin-top: 10px;
     }
 
     button:hover {
       background: #ff6b6b;
-    }
-
-    button:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-
-    .frame-info {
-      font-size: 12px;
-      color: #aaa;
     }
 
     .opacity-control {
@@ -134,10 +103,6 @@
       padding: 20px;
       border-radius: 8px;
       margin-bottom: 20px;
-    }
-
-    .opacity-control h3 {
-      margin-bottom: 15px;
     }
 
     .slider-container {
@@ -183,11 +148,6 @@
       justify-content: center;
     }
 
-    .canvas-container {
-      position: relative;
-      display: inline-block;
-    }
-
     #compositeCanvas {
       display: block;
       max-width: 100%;
@@ -199,41 +159,6 @@
       font-size: 18px;
       text-align: center;
       padding: 40px;
-    }
-
-    video {
-      display: none;
-    }
-
-    .keyboard-shortcuts {
-      background: #16213e;
-      padding: 15px 20px;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-
-    .keyboard-shortcuts h4 {
-      margin-bottom: 10px;
-      color: #e94560;
-    }
-
-    .shortcuts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
-      font-size: 13px;
-    }
-
-    .shortcut {
-      display: flex;
-      gap: 10px;
-    }
-
-    .shortcut kbd {
-      background: #0f3460;
-      padding: 2px 8px;
-      border-radius: 3px;
-      font-family: monospace;
     }
 
     .blend-mode-control {
@@ -271,43 +196,48 @@
       border: 1px solid #444;
       border-radius: 4px;
     }
+
+    .keyboard-shortcuts {
+      background: #16213e;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .shortcuts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .shortcut kbd {
+      background: #0f3460;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Video Frame Overlay QA Tool</h1>
+    <h1>Image Overlay QA Tool</h1>
 
     <div class="controls">
-      <div class="video-input base">
-        <h3>Base Video (Background)</h3>
-        <label for="baseVideo">Select base video file:</label>
-        <input type="file" id="baseVideoFile" accept="video/*">
-        <div class="video-controls">
-          <div class="video-scrubber">
-            <input type="range" id="baseScrubber" min="0" max="100" step="0.001" value="0" disabled>
-            <span class="time-display" id="baseTimeDisplay">0:00.000 / 0:00.000</span>
-          </div>
-          <div class="capture-btn-row">
-            <button id="baseCapture" disabled>Capture Frame</button>
-            <button id="basePlayPause" disabled>Play</button>
-          </div>
-        </div>
+      <div class="image-input base">
+        <h3>Base Image (Background)</h3>
+        <label for="baseImage">Select image file or paste base64:</label>
+        <input type="file" id="baseImageFile" accept="image/*">
+        <textarea id="baseBase64" placeholder="Or paste base64 data here..."></textarea>
+        <button id="loadBase">Load Base64</button>
       </div>
 
-      <div class="video-input overlay">
-        <h3>Overlay Video (Foreground)</h3>
-        <label for="overlayVideo">Select overlay video file:</label>
-        <input type="file" id="overlayVideoFile" accept="video/*">
-        <div class="video-controls">
-          <div class="video-scrubber">
-            <input type="range" id="overlayScrubber" min="0" max="100" step="0.001" value="0" disabled>
-            <span class="time-display" id="overlayTimeDisplay">0:00.000 / 0:00.000</span>
-          </div>
-          <div class="capture-btn-row">
-            <button id="overlayCapture" disabled>Capture Frame</button>
-            <button id="overlayPlayPause" disabled>Play</button>
-          </div>
-        </div>
+      <div class="image-input overlay">
+        <h3>Overlay Image (Foreground)</h3>
+        <label for="overlayImage">Select image file or paste base64:</label>
+        <input type="file" id="overlayImageFile" accept="image/*">
+        <textarea id="overlayBase64" placeholder="Or paste base64 data here..."></textarea>
+        <button id="loadOverlay">Load Base64</button>
       </div>
     </div>
 
@@ -347,12 +277,8 @@
     </div>
 
     <div class="comparison-view">
-      <div class="canvas-container" id="canvasContainer">
-        <div class="placeholder" id="placeholder">
-          Load videos and capture frames to compare
-        </div>
-        <canvas id="compositeCanvas"></canvas>
-      </div>
+      <div class="placeholder" id="placeholder">Load images to compare</div>
+      <canvas id="compositeCanvas" style="display: none;"></canvas>
     </div>
 
     <div class="keyboard-shortcuts">
@@ -363,20 +289,18 @@
         <div class="shortcut"><kbd>D</kbd> Toggle difference mode</div>
         <div class="shortcut"><kbd>Arrow Keys</kbd> Nudge overlay position</div>
         <div class="shortcut"><kbd>R</kbd> Reset position</div>
-        <div class="shortcut"><kbd>Space</kbd> Play/Pause base video</div>
       </div>
     </div>
   </div>
 
-  <video id="baseVideo"></video>
-  <video id="overlayVideo"></video>
-
   <script>
     // Elements
-    const baseVideoFile = document.getElementById('baseVideoFile');
-    const overlayVideoFile = document.getElementById('overlayVideoFile');
-    const baseVideo = document.getElementById('baseVideo');
-    const overlayVideo = document.getElementById('overlayVideo');
+    const baseImageFile = document.getElementById('baseImageFile');
+    const overlayImageFile = document.getElementById('overlayImageFile');
+    const baseBase64 = document.getElementById('baseBase64');
+    const overlayBase64 = document.getElementById('overlayBase64');
+    const loadBase = document.getElementById('loadBase');
+    const loadOverlay = document.getElementById('loadOverlay');
     const compositeCanvas = document.getElementById('compositeCanvas');
     const compositeCtx = compositeCanvas.getContext('2d');
     const opacitySlider = document.getElementById('opacitySlider');
@@ -385,180 +309,94 @@
     const offsetX = document.getElementById('offsetX');
     const offsetY = document.getElementById('offsetY');
     const placeholder = document.getElementById('placeholder');
-
-    // Off-screen canvases to store captured frames
-    const baseFrameCanvas = document.createElement('canvas');
-    const baseFrameCtx = baseFrameCanvas.getContext('2d');
-    const overlayFrameCanvas = document.createElement('canvas');
-    const overlayFrameCtx = overlayFrameCanvas.getContext('2d');
-
-    // Buttons
-    const baseCapture = document.getElementById('baseCapture');
-    const basePlayPause = document.getElementById('basePlayPause');
-    const overlayCapture = document.getElementById('overlayCapture');
-    const overlayPlayPause = document.getElementById('overlayPlayPause');
     const resetPosition = document.getElementById('resetPosition');
 
-    // Scrubbers and time displays
-    const baseScrubber = document.getElementById('baseScrubber');
-    const overlayScrubber = document.getElementById('overlayScrubber');
-    const baseTimeDisplay = document.getElementById('baseTimeDisplay');
-    const overlayTimeDisplay = document.getElementById('overlayTimeDisplay');
+    // Image storage
+    const baseImage = new Image();
+    const overlayImage = new Image();
+    let baseLoaded = false;
+    let overlayLoaded = false;
 
-    // State
-    let baseFrameCaptured = false;
-    let overlayFrameCaptured = false;
-    let isScrubbing = { base: false, overlay: false };
-
-    // Load video files
-    baseVideoFile.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        baseVideo.src = URL.createObjectURL(file);
-        baseVideo.load();
-      }
-    });
-
-    overlayVideoFile.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        overlayVideo.src = URL.createObjectURL(file);
-        overlayVideo.load();
-      }
-    });
-
-    // Format time as M:SS.mmm
-    function formatTime(seconds) {
-      const mins = Math.floor(seconds / 60);
-      const secs = (seconds % 60).toFixed(3).padStart(6, '0');
-      return `${mins}:${secs}`;
+    // Load image from file
+    function loadImageFromFile(file, img, isBase) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
 
-    // Update time display
-    function updateTimeDisplay(type) {
-      const video = type === 'base' ? baseVideo : overlayVideo;
-      const display = type === 'base' ? baseTimeDisplay : overlayTimeDisplay;
-      const scrubber = type === 'base' ? baseScrubber : overlayScrubber;
-
-      display.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
-
-      if (!isScrubbing[type]) {
-        scrubber.value = (video.currentTime / video.duration) * 100;
+    // Load image from base64
+    function loadImageFromBase64(base64, img, isBase) {
+      // Handle data URLs or raw base64
+      if (base64.startsWith('data:image')) {
+        img.src = base64;
+      } else {
+        img.src = 'data:image/png;base64,' + base64.trim();
       }
     }
 
-    // Video loaded handlers
-    baseVideo.addEventListener('loadedmetadata', () => {
-      baseCapture.disabled = false;
-      basePlayPause.disabled = false;
-      baseScrubber.disabled = false;
-      updateTimeDisplay('base');
-    });
-
-    overlayVideo.addEventListener('loadedmetadata', () => {
-      overlayCapture.disabled = false;
-      overlayPlayPause.disabled = false;
-      overlayScrubber.disabled = false;
-      updateTimeDisplay('overlay');
-    });
-
-    // Time update handlers
-    baseVideo.addEventListener('timeupdate', () => updateTimeDisplay('base'));
-    overlayVideo.addEventListener('timeupdate', () => updateTimeDisplay('overlay'));
-
-    // Play/Pause handlers
-    basePlayPause.addEventListener('click', () => {
-      if (baseVideo.paused) {
-        baseVideo.play();
-        basePlayPause.textContent = 'Pause';
-      } else {
-        baseVideo.pause();
-        basePlayPause.textContent = 'Play';
-      }
-    });
-
-    overlayPlayPause.addEventListener('click', () => {
-      if (overlayVideo.paused) {
-        overlayVideo.play();
-        overlayPlayPause.textContent = 'Pause';
-      } else {
-        overlayVideo.pause();
-        overlayPlayPause.textContent = 'Play';
-      }
-    });
-
-    // Update button text when video ends
-    baseVideo.addEventListener('ended', () => basePlayPause.textContent = 'Play');
-    overlayVideo.addEventListener('ended', () => overlayPlayPause.textContent = 'Play');
-
-    // Scrubber handlers
-    baseScrubber.addEventListener('mousedown', () => isScrubbing.base = true);
-    baseScrubber.addEventListener('input', () => {
-      baseVideo.currentTime = (baseScrubber.value / 100) * baseVideo.duration;
-    });
-    baseScrubber.addEventListener('mouseup', () => isScrubbing.base = false);
-    baseScrubber.addEventListener('mouseleave', () => isScrubbing.base = false);
-
-    overlayScrubber.addEventListener('mousedown', () => isScrubbing.overlay = true);
-    overlayScrubber.addEventListener('input', () => {
-      overlayVideo.currentTime = (overlayScrubber.value / 100) * overlayVideo.duration;
-    });
-    overlayScrubber.addEventListener('mouseup', () => isScrubbing.overlay = false);
-    overlayScrubber.addEventListener('mouseleave', () => isScrubbing.overlay = false);
-
-    // Capture frames
-    baseCapture.addEventListener('click', () => {
-      captureFrame('base');
-    });
-
-    overlayCapture.addEventListener('click', () => {
-      captureFrame('overlay');
-    });
-
-    function captureFrame(type) {
-      const video = type === 'base' ? baseVideo : overlayVideo;
-      const frameCanvas = type === 'base' ? baseFrameCanvas : overlayFrameCanvas;
-      const frameCtx = type === 'base' ? baseFrameCtx : overlayFrameCtx;
-
-      // Store frame in off-screen canvas
-      frameCanvas.width = video.videoWidth;
-      frameCanvas.height = video.videoHeight;
-      frameCtx.drawImage(video, 0, 0);
-
-      if (type === 'base') {
-        baseFrameCaptured = true;
-        placeholder.style.display = 'none';
-        compositeCanvas.style.display = 'block';
-      } else {
-        overlayFrameCaptured = true;
-      }
-
-      // Render composite
+    // Image load handlers
+    baseImage.onload = () => {
+      baseLoaded = true;
+      placeholder.style.display = 'none';
+      compositeCanvas.style.display = 'block';
       renderComposite();
-    }
+    };
 
-    // Render both frames onto the composite canvas
+    overlayImage.onload = () => {
+      overlayLoaded = true;
+      renderComposite();
+    };
+
+    // File input handlers
+    baseImageFile.addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        loadImageFromFile(e.target.files[0], baseImage, true);
+      }
+    });
+
+    overlayImageFile.addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        loadImageFromFile(e.target.files[0], overlayImage, false);
+      }
+    });
+
+    // Base64 load handlers
+    loadBase.addEventListener('click', () => {
+      if (baseBase64.value.trim()) {
+        loadImageFromBase64(baseBase64.value, baseImage, true);
+      }
+    });
+
+    loadOverlay.addEventListener('click', () => {
+      if (overlayBase64.value.trim()) {
+        loadImageFromBase64(overlayBase64.value, overlayImage, false);
+      }
+    });
+
+    // Render composite
     function renderComposite() {
-      if (!baseFrameCaptured) return;
+      if (!baseLoaded) return;
 
-      // Size composite canvas to base frame
-      compositeCanvas.width = baseFrameCanvas.width;
-      compositeCanvas.height = baseFrameCanvas.height;
+      // Size composite canvas to base image
+      compositeCanvas.width = baseImage.width;
+      compositeCanvas.height = baseImage.height;
 
-      // Draw base frame
+      // Draw base image
       compositeCtx.globalAlpha = 1;
       compositeCtx.globalCompositeOperation = 'source-over';
-      compositeCtx.drawImage(baseFrameCanvas, 0, 0);
+      compositeCtx.drawImage(baseImage, 0, 0);
 
-      // Draw overlay frame if captured
-      if (overlayFrameCaptured) {
+      // Draw overlay image if loaded
+      if (overlayLoaded) {
         const opacity = opacitySlider.value / 100;
         const ox = parseInt(offsetX.value) || 0;
         const oy = parseInt(offsetY.value) || 0;
 
         compositeCtx.globalAlpha = opacity;
         compositeCtx.globalCompositeOperation = blendMode.value;
-        compositeCtx.drawImage(overlayFrameCanvas, ox, oy);
+        compositeCtx.drawImage(overlayImage, ox, oy);
       }
 
       // Reset context state
@@ -566,31 +404,25 @@
       compositeCtx.globalCompositeOperation = 'source-over';
     }
 
-    // Update overlay (now just re-renders composite)
-    function updateOverlay() {
-      renderComposite();
-    }
-
-    // Event listeners for controls
+    // Control event listeners
     opacitySlider.addEventListener('input', () => {
       opacityValue.textContent = opacitySlider.value + '%';
-      updateOverlay();
+      renderComposite();
     });
 
-    blendMode.addEventListener('change', updateOverlay);
-    offsetX.addEventListener('input', updateOverlay);
-    offsetY.addEventListener('input', updateOverlay);
+    blendMode.addEventListener('change', renderComposite);
+    offsetX.addEventListener('input', renderComposite);
+    offsetY.addEventListener('input', renderComposite);
 
     resetPosition.addEventListener('click', () => {
       offsetX.value = 0;
       offsetY.value = 0;
-      updateOverlay();
+      renderComposite();
     });
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-      // Ignore if typing in input
-      if (e.target.tagName === 'INPUT') return;
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
 
       const key = e.key.toLowerCase();
 
@@ -598,33 +430,33 @@
       if (key >= '1' && key <= '9') {
         opacitySlider.value = parseInt(key) * 10;
         opacityValue.textContent = opacitySlider.value + '%';
-        updateOverlay();
+        renderComposite();
       } else if (key === '0') {
         opacitySlider.value = 100;
         opacityValue.textContent = '100%';
-        updateOverlay();
+        renderComposite();
       }
 
       // D for difference mode toggle
       if (key === 'd') {
         blendMode.value = blendMode.value === 'difference' ? 'normal' : 'difference';
-        updateOverlay();
+        renderComposite();
       }
 
       // Arrow keys for position
       if (e.key === 'ArrowLeft') {
         offsetX.value = parseInt(offsetX.value) - 1;
-        updateOverlay();
+        renderComposite();
       } else if (e.key === 'ArrowRight') {
         offsetX.value = parseInt(offsetX.value) + 1;
-        updateOverlay();
+        renderComposite();
       } else if (e.key === 'ArrowUp') {
         offsetY.value = parseInt(offsetY.value) - 1;
-        updateOverlay();
+        renderComposite();
         e.preventDefault();
       } else if (e.key === 'ArrowDown') {
         offsetY.value = parseInt(offsetY.value) + 1;
-        updateOverlay();
+        renderComposite();
         e.preventDefault();
       }
 
@@ -632,25 +464,9 @@
       if (key === 'r') {
         offsetX.value = 0;
         offsetY.value = 0;
-        updateOverlay();
-      }
-
-      // Space for play/pause base video
-      if (e.code === 'Space') {
-        e.preventDefault();
-        if (baseVideo.paused) {
-          baseVideo.play();
-          basePlayPause.textContent = 'Pause';
-        } else {
-          baseVideo.pause();
-          basePlayPause.textContent = 'Play';
-        }
+        renderComposite();
       }
     });
-
-    // Initialize canvas display
-    compositeCanvas.style.display = 'none';
   </script>
 </body>
 </html>
-
